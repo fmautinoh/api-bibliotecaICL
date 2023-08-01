@@ -131,5 +131,89 @@ namespace Api_Inventariobiblioteca.Controllers
             return _apiResponse;
         }
 
+        [HttpPost]
+        [Route("/UpdateLibro/{idLib:int}/{idAL:int}")]
+        [ProducesResponseType(200)]//ok
+        [ProducesResponseType(400)]//badreq
+        [ProducesResponseType(500)]//Internal Error
+        [ProducesResponseType(404)]//no found
+        [ProducesResponseType(204)]//No content
+        [ProducesResponseType(409)]//no found
+
+        public async Task<ActionResult<APIResponse>> UpdateLibro(int idLib, [FromBody] LibroCreatedDto ModelLibro)
+        {
+            try
+            {
+                if (ModelLibro == null)
+                {
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.IsSuccess = false;
+
+                    return BadRequest(_apiResponse);
+                }
+
+                var isexistente = await _Librorrepo.ListObjetos(c => c.NombreLib == ModelLibro.NombreLib && c.TipoId == ModelLibro.TipoId && c.Editorial == ModelLibro.Editorial
+                && c.Año==ModelLibro.Año && c.Edicion == ModelLibro.Edicion);
+                if (isexistente.Count != 0)
+                {
+                    var message = "Libro Existente";
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.Alertmsg = message;
+                    return BadRequest(_apiResponse);
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    var message = "Campos Invalidos";
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.Resultado = ModelState;
+                    _apiResponse.Alertmsg = message;
+                    return BadRequest(_apiResponse);
+                }
+
+                var arreglolenght = ModelLibro.Autor.Count;
+
+                Libro modelcreate = new()
+                {
+                    LibroId = idLib,
+                    NombreLib = ModelLibro.NombreLib,
+                    TipoId = ModelLibro.TipoId,
+                    Edicion = ModelLibro.Edicion,
+                    Año = ModelLibro.Año,
+                    Editorial = ModelLibro.Editorial
+                };
+                await _Librorrepo.Actualizar(modelcreate);
+                Libro creado = await _Librorrepo.Listar(c => c.NombreLib == ModelLibro.NombreLib, tracked: false);
+                List<LibrosAutore> listaLibroAutor =await _LibroAutorepo.ListObjetos(c=> c.LibroId == idLib);
+                for (int i = 0; i < listaLibroAutor.Count; i++)
+                {
+                    int autorId = ModelLibro.Autor[i];
+
+                    // Update the registro in the table LibrosAutores
+                    LibrosAutore modelautorlibro = new()
+                    {
+                        LibroAutorID = listaLibroAutor[i].LibroAutorID, // Use the existing LibroAutorID
+                        LibroId = idLib,
+                        AutorId = autorId
+                    };
+                    LibrosAutore AutoreCrt = _mapper.Map<LibrosAutore>(modelautorlibro);
+                    await _LibroAutorepo.Actualizar(modelautorlibro);
+                }
+                _apiResponse.Alertmsg = "Libro Actualizado Correctamente Exitosamente";
+                _apiResponse.StatusCode = HttpStatusCode.NoContent;
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessage = new List<string> { ex.ToString() };
+            }
+            return _apiResponse;
+        }
+
+
+
     }
 }
