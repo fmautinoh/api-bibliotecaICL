@@ -31,15 +31,15 @@ namespace Api_Inventariobiblioteca.Controllers
 
         [HttpGet]
         [Route("/ListaLibro")]
-        [ProducesResponseType(200)]//ok
-        [ProducesResponseType(400)]//badreq
-        [ProducesResponseType(404)]//no found
+        [ProducesResponseType(200)] // OK
+        [ProducesResponseType(400)] // BadRequest
+        [ProducesResponseType(404)] // NotFound
         public async Task<ActionResult<APIResponse>> GetLibro()
         {
             try
             {
-                var listaLibros = await _Librorrepo.ListObjetos();
-                //IEnumerable<LibroDto> autorlist = (IEnumerable<LibroDto>)await _vistalibrorepo.ListObjetos();
+                var listaLibros = await _vistalibrorepo.ListLibrosConAutores(); // Use the new method
+
                 _apiResponse.Alertmsg = "Listado Exitosamente";
                 _apiResponse.Resultado = listaLibros;
                 _apiResponse.StatusCode = HttpStatusCode.OK;
@@ -132,8 +132,8 @@ namespace Api_Inventariobiblioteca.Controllers
             return _apiResponse;
         }
 
-        [HttpPost]
-        [Route("/UpdateLibro/{idLib:int}/{idAL:int}")]
+        [HttpPut]
+        [Route("/UpdateLibro/{idLib:int}")]
         [ProducesResponseType(200)]//ok
         [ProducesResponseType(400)]//badreq
         [ProducesResponseType(500)]//Internal Error
@@ -151,18 +151,7 @@ namespace Api_Inventariobiblioteca.Controllers
                     _apiResponse.IsSuccess = false;
 
                     return BadRequest(_apiResponse);
-                }
-
-                var isexistente = await _Librorrepo.ListObjetos(c => c.NombreLib == ModelLibro.NombreLib && c.TipoId == ModelLibro.TipoId && c.Editorial == ModelLibro.Editorial
-                && c.Año==ModelLibro.Año && c.Edicion == ModelLibro.Edicion);
-                if (isexistente.Count != 0)
-                {
-                    var message = "Libro Existente";
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.Alertmsg = message;
-                    return BadRequest(_apiResponse);
-                }
+                } 
 
                 if (!ModelState.IsValid)
                 {
@@ -187,21 +176,31 @@ namespace Api_Inventariobiblioteca.Controllers
                 };
                 await _Librorrepo.Actualizar(modelcreate);
                 Libro creado = await _Librorrepo.Listar(c => c.NombreLib == ModelLibro.NombreLib, tracked: false);
-                List<LibrosAutore> listaLibroAutor =await _LibroAutorepo.ListObjetos(c=> c.LibroId == idLib);
-                for (int i = 0; i < listaLibroAutor.Count; i++)
-                {
-                    int autorId = ModelLibro.Autor[i];
+                List<LibrosAutore> listaLibroAutor = await _LibroAutorepo.ListObjetos(c => c.LibroId == idLib);
 
-                    // Update the registro in the table LibrosAutores
+                // Update existing records with new author IDs
+                foreach (var libroAutor in listaLibroAutor)
+                {
+                    int? autorId = ModelLibro.Autor.FirstOrDefault(a => a == libroAutor.AutorId);
+                    if (autorId.HasValue)
+                    {
+                        libroAutor.AutorId = autorId.Value;
+                        await _LibroAutorepo.Remover(libroAutor);
+                    }
+                }
+
+                foreach (var autorId in ModelLibro.Autor)
+                {
+                    // Crear el registro en la tabla LibrosAutores
                     LibrosAutore modelautorlibro = new()
                     {
-                        LibroAutorID = listaLibroAutor[i].LibroAutorID, // Use the existing LibroAutorID
                         LibroId = idLib,
                         AutorId = autorId
                     };
                     LibrosAutore AutoreCrt = _mapper.Map<LibrosAutore>(modelautorlibro);
-                    await _LibroAutorepo.Actualizar(modelautorlibro);
+                    await _LibroAutorepo.Crear(modelautorlibro);
                 }
+
                 _apiResponse.Alertmsg = "Libro Actualizado Correctamente Exitosamente";
                 _apiResponse.StatusCode = HttpStatusCode.NoContent;
                 return Ok(_apiResponse);
