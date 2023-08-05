@@ -1,5 +1,7 @@
 using api_bibliotecaICL;
 using api_bibliotecaICL.Models;
+using api_bibliotecaICL.Repositorio;
+using api_bibliotecaICL.Repositorio.IRepositorio;
 using Api_Inventariobiblioteca.Models;
 using Api_Inventariobiblioteca.Repositorio;
 using Api_Inventariobiblioteca.Repositorio.IRepositorio;
@@ -31,6 +33,9 @@ builder.Services.AddScoped<ITipoLibroRepositorio, TipoLibroRepositorio>();
 builder.Services.AddScoped<ILibroRepositorio, LibroRepositorio>();
 builder.Services.AddScoped<ILibroxAutorRepositorio, LibroxAutorRepositorio>();
 builder.Services.AddScoped<Ivlibrorepositorio, vlibrorepositorio>();
+builder.Services.AddScoped<IvInventarioRepositorio, vInventarioRepositorio>();
+builder.Services.AddScoped<IInventarioRepositorio, InventarioRepositorio>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
