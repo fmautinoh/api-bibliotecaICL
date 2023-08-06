@@ -35,7 +35,7 @@ builder.Services.AddScoped<ILibroxAutorRepositorio, LibroxAutorRepositorio>();
 builder.Services.AddScoped<Ivlibrorepositorio, vlibrorepositorio>();
 builder.Services.AddScoped<IvInventarioRepositorio, vInventarioRepositorio>();
 builder.Services.AddScoped<IInventarioRepositorio, InventarioRepositorio>();
-
+builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio> ();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

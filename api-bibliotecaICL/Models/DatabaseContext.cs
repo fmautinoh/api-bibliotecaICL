@@ -169,7 +169,7 @@ public partial class DatabaseContext : DbContext
             entity.ToTable("Usuario");
 
             entity.Property(e => e.Pwsd)
-                .HasColumnType("ntext")
+                .HasColumnType("nvarchar")
                 .HasColumnName("pwsd");
             entity.Property(e => e.Usu)
                 .HasMaxLength(50)
