@@ -165,8 +165,42 @@ namespace api_bibliotecaICL.Controllers
             return Ok(_apiResponse);
         }
 
+        [HttpDelete]
+        [Route("/deleteLibros/{idlib:int}")]
+        [ProducesResponseType(200)]//ok
+        [ProducesResponseType(400)]//badreq
+        [ProducesResponseType(500)]//Internal Error
+        [ProducesResponseType(404)]//no found
+        [ProducesResponseType(204)]//No content
 
+        public async Task<IActionResult> DeleteLib(int idlib)
+        {
+            try
+            {
+                var MdLibro = await _Invrepo.Listar(c => c.InventarioId == idlib, tracked: false);
 
+                InventarioLibro deleteLB = new()
+                {
+                    InventarioId= idlib,
+                    Codigo=MdLibro.Codigo,
+                    EstadoId=MdLibro.EstadoId,
+                    LibroId=MdLibro.LibroId
+                };
+
+                await _Invrepo.Remover(deleteLB);
+                var message = "Libro Eliminado Exitosamente";
+                _apiResponse.Alertmsg = message;
+                _apiResponse.StatusCode = HttpStatusCode.NoContent;
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessage = new List<string> { ex.ToString() };
+            }
+            return Ok(_apiResponse);
+        }
 
 
     }
