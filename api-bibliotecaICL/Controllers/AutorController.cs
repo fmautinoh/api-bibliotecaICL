@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using APICL.Models;
 using api_bibliotecaICL.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Api_Inventariobiblioteca.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AutorController : ControllerBase

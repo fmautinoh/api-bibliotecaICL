@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using api_bibliotecaICL.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Api_Inventariobiblioteca.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TipoLibroController : ControllerBase
