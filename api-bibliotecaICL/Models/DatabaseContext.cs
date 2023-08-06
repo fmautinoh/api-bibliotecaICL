@@ -34,6 +34,7 @@ public partial class DatabaseContext : DbContext
     public virtual DbSet<VInventario> VInventarios { get; set; }
 
     public virtual DbSet<VLibro> VLibros { get; set; }
+    public virtual DbSet<Usuario> Usuarios { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -159,6 +160,21 @@ public partial class DatabaseContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("TipoLibro");
+        });
+
+        modelBuilder.Entity<Usuario>(entity =>
+        {
+            entity.HasKey(e => e.UsuarioId).HasName("PK__Usuario__2B3DE7B85AF4C225");
+
+            entity.ToTable("Usuario");
+
+            entity.Property(e => e.Pwsd)
+                .HasColumnType("ntext")
+                .HasColumnName("pwsd");
+            entity.Property(e => e.Usu)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("usu");
         });
 
         modelBuilder.Entity<VInventario>(entity =>
