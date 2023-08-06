@@ -14,11 +14,7 @@ namespace api_bibliotecaICL
             CreateMap<TipoAutorDto, TipoAutor>().ReverseMap();
             CreateMap<TipoLibroDto, TipoLibro>().ReverseMap();
             CreateMap<LibrosAutore, LibroAutorCreatedDto>().ReverseMap();
-
-
-
-
-
+            CreateMap<InventarioLibro, InventarioDto>().ReverseMap();
         }
     }
 }
